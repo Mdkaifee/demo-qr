@@ -1,0 +1,14 @@
+{
+  "name": "restaurant-menu-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env index.js --dev",
+    "start": "node --env-file-if-exists=.env index.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.12.0",
+    "vite": "^7.1.5"
+  }
+}
