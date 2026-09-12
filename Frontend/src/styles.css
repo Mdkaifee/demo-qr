@@ -740,3 +740,357 @@ a { color: inherit; }
   .dish-card { grid-template-columns: 1fr; }
   .dish-photo, .dish-placeholder { width: 100%; height: 160px; }
 }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.18) 42%, rgba(8, 117, 104, 0.08)),
+    radial-gradient(circle at 88% 12%, rgba(173, 116, 31, 0.12), transparent 22rem);
+}
+
+.site-header {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.header-inner {
+  min-height: 78px;
+}
+
+.header-right .button {
+  min-width: 128px;
+  font-weight: 800;
+}
+
+.workspace {
+  padding-top: 34px;
+}
+
+.page-intro {
+  position: relative;
+  min-height: 196px;
+  align-items: center;
+  padding: 28px;
+  border: 1px solid rgba(227, 220, 207, 0.92);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 253, 248, 0.66)),
+    linear-gradient(90deg, rgba(8, 117, 104, 0.1), transparent 58%);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.page-intro::after {
+  content: "";
+  position: absolute;
+  right: 28px;
+  bottom: -74px;
+  width: 220px;
+  height: 220px;
+  border: 28px solid rgba(8, 117, 104, 0.08);
+  border-radius: 50%;
+}
+
+.page-intro > * {
+  position: relative;
+  z-index: 1;
+}
+
+.page-intro .live-label {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+.stats {
+  margin-top: 18px;
+}
+
+.stat {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat::after {
+  content: "";
+  position: absolute;
+  inset: auto -24px -34px auto;
+  width: 94px;
+  height: 94px;
+  border-radius: 50%;
+  background: rgba(8, 117, 104, 0.06);
+}
+
+.tabs {
+  position: sticky;
+  top: 79px;
+  z-index: 12;
+  margin: 4px -6px 6px;
+  padding: 12px 6px;
+  background: linear-gradient(180deg, rgba(247, 244, 238, 0.97), rgba(247, 244, 238, 0.86));
+  backdrop-filter: blur(14px);
+}
+
+.tab {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.tab:not(.selected):hover,
+.guest-menu-tabs button:not(.selected):hover,
+.category-tabs button:not(.selected):hover {
+  border-color: rgba(8, 117, 104, 0.42);
+  color: var(--accent-dark);
+  background: #fff;
+}
+
+.section-content {
+  padding-top: 10px;
+}
+
+.section-heading {
+  padding: 4px 0 2px;
+}
+
+.section-heading .button.primary {
+  min-width: 148px;
+  box-shadow: 0 12px 24px rgba(8, 117, 104, 0.16);
+}
+
+.filter-bar {
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(227, 220, 207, 0.72);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.record-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.record-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), rgba(173, 116, 31, 0.72));
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.record-card:hover::before {
+  opacity: 1;
+}
+
+.record-card h3 {
+  line-height: 1.15;
+}
+
+.card-meta {
+  display: grid;
+  gap: 8px;
+}
+
+.card-actions {
+  border-top: 1px solid rgba(227, 220, 207, 0.8);
+}
+
+.badge {
+  min-height: 30px;
+}
+
+.badge.active i,
+.live-label i {
+  box-shadow: 0 0 0 4px rgba(4, 120, 87, 0.12);
+}
+
+.actions-popover {
+  animation: pop 120ms ease-out;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.dialog {
+  backdrop-filter: blur(7px);
+}
+
+.dialog > div {
+  animation: modalIn 160ms ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+}
+
+.form label {
+  font-size: 14px;
+}
+
+.form input,
+.form select,
+.form textarea,
+.multi-select summary {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+.checkbox-field {
+  width: fit-content;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft);
+  padding: 10px 12px;
+}
+
+.login-shell {
+  position: relative;
+}
+
+.login-form-panel {
+  position: relative;
+  border-color: rgba(8, 117, 104, 0.22);
+  box-shadow: var(--shadow);
+}
+
+.login-form-panel::before {
+  content: "";
+  display: block;
+  height: 4px;
+  margin: -24px -24px 20px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+.login-note {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.login-illustration {
+  box-shadow: var(--shadow-soft);
+}
+
+.home-hero,
+.guest-hero {
+  position: relative;
+  margin-bottom: 18px;
+  padding: 42px 0 22px;
+}
+
+.home-hero::after,
+.guest-hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 84px;
+  height: 4px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+.guest-menu-tabs {
+  margin-top: 4px;
+}
+
+.guest-menu-heading {
+  padding: 18px 0 6px;
+  border-top: 1px solid rgba(227, 220, 207, 0.86);
+}
+
+.guest-controls {
+  position: sticky;
+  top: 79px;
+  z-index: 10;
+  padding: 12px 0;
+  background: linear-gradient(180deg, rgba(247, 244, 238, 0.97), rgba(247, 244, 238, 0.86));
+  backdrop-filter: blur(14px);
+}
+
+.dish-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.dish-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 99px;
+  background: rgba(8, 117, 104, 0.24);
+}
+
+.dish-card h4 {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.guest-footnote {
+  margin-top: 30px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.62);
+  line-height: 1.55;
+}
+
+.unavailable,
+.loading {
+  max-width: 680px;
+  margin: 70px auto;
+}
+
+@media (max-width: 760px) {
+  .page-intro {
+    min-height: auto;
+    padding: 22px;
+  }
+
+  .tabs,
+  .guest-controls {
+    top: 0;
+  }
+
+  .filter-bar {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 540px) {
+  .brand {
+    gap: 10px;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+  }
+
+  .page-intro {
+    padding: 18px;
+  }
+
+  .section-heading .button.primary {
+    width: 100%;
+  }
+
+  .tabs {
+    margin-left: -12px;
+    margin-right: -12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
