@@ -142,19 +142,28 @@ function bindFilters() {
   document.querySelector("#menu-filter")?.addEventListener("change", event => { filter = event.target.value; document.querySelector("#cards").innerHTML = cardsContent(); });
 }
 
-function input(name, label, value = "", type = "text", extra = "") { return `<label>${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`; }
-function textarea(name, label, value = "", max = 1000) { return `<label>${label}<textarea name="${name}" rows="3" maxlength="${max}">${esc(value)}</textarea></label>`; }
-function select(name, label, rows, value, optional = false) { return `<label>${label}<select name="${name}" ${optional ? "" : "required"}><option value="">Select ${label.toLowerCase()}</option>${rows.map(row => `<option value="${esc(row.id)}" ${row.id === value ? "selected" : ""}>${esc(row.name)}</option>`).join("")}</select></label>`; }
-function multi(name, label, rows, values = []) {
-  return `<div class="multi-field"><span class="field-label">${label}</span><details class="multi-select"><summary aria-label="${label}"><span class="selection-count">${values.length ? `${values.length} selected` : `Select ${label.toLowerCase()}`}</span><span>v</span></summary><div class="multi-options">${rows.length ? rows.map(row => `<label><input type="checkbox" name="${name}" value="${row.id}" ${values.includes(row.id) ? "checked" : ""}><span>${esc(row.name)}${row.active ? "" : " (inactive)"}</span></label>`).join("") : '<p class="muted">Create one first to select it here.</p>'}</div></details><small>Select as many as you need.</small></div>`;
+function input(name, label, value = "", type = "text", extra = "") {
+  return `<label class="field-label">${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`;
 }
-function toggleField(name, label, value) { return `<label class="checkbox-field"><input type="checkbox" name="${name}" ${value ? "checked" : ""}><span>${label}</span></label>`; }
-function showDialog(title, body, subtitle = "") {
+function textarea(name, label, value = "", max = 1000) {
+  return `<label class="field-label">${label}<textarea name="${name}" rows="3" maxlength="${max}">${esc(value)}</textarea></label>`;
+}
+function select(name, label, rows, value, optional = false) {
+  return `<label class="field-label">${label}<select name="${name}" ${optional ? "" : "required"}><option value="">Select ${label.toLowerCase()}</option>${rows.map(row => `<option value="${esc(row.id)}" ${row.id === value ? "selected" : ""}>${esc(row.name)}</option>`).join("")}</select></label>`;
+}
+function multi(name, label, rows, values = []) {
+  return `<div class="multi-field"><span class="field-label">${label}</span><details class="multi-select"><summary aria-label="${label}"><span class="selection-count">${values.length ? `<strong>${values.length}</strong> selected` : `Select ${label.toLowerCase()}`}</span><span class="multi-chevron">${icon("arrow")}</span></summary><div class="multi-options">${rows.length ? rows.map(row => `<label class="multi-option ${values.includes(row.id) ? "is-checked" : ""}"><input type="checkbox" name="${name}" value="${row.id}" ${values.includes(row.id) ? "checked" : ""}><span>${esc(row.name)}${row.active ? "" : ' <small class="muted">(inactive)</small>'}</span></label>`).join("") : '<p class="muted empty-multi">Create one first to select it here.</p>'}</div></details><small class="field-hint">Select as many as you need.</small></div>`;
+}
+function toggleField(name, label, value, hint = "") {
+  return `<label class="toggle-card"><div class="toggle-text"><span class="toggle-label">${label}</span>${hint ? `<small class="toggle-hint">${hint}</small>` : ""}</div><div class="toggle-switch"><input type="checkbox" name="${name}" ${value ? "checked" : ""}><span class="toggle-slider"></span></div></label>`;
+}
+function showDialog(title, body, subtitle = "", eyebrow = "RESTAURANT WORKSPACE") {
   closeDialog();
   dialogReturnFocus = document.activeElement;
   const dialog = document.createElement("dialog");
   dialog.id = "editor-dialog";
-  dialog.innerHTML = `<div class="dialog-head"><div><span class="eyebrow">RESTAURANT WORKSPACE</span><h2 id="dialog-title">${esc(title)}</h2>${subtitle ? `<p class="muted">${esc(subtitle)}</p>` : ""}</div><button class="icon-button" data-action="close" aria-label="Close dialog">${icon("close")}</button></div>${body}`;
+  dialog.className = "app-dialog";
+  dialog.innerHTML = `<div class="dialog-card"><div class="dialog-head"><div><span class="eyebrow">${esc(eyebrow)}</span><h2 id="dialog-title">${esc(title)}</h2>${subtitle ? `<p class="dialog-subtitle">${esc(subtitle)}</p>` : ""}</div><button class="icon-button dialog-close" data-action="close" aria-label="Close dialog">${icon("close")}</button></div><div class="dialog-body">${body}</div></div>`;
   dialog.setAttribute("aria-labelledby", "dialog-title");
   document.body.append(dialog);
   dialog.showModal();
@@ -163,7 +172,8 @@ function showDialog(title, body, subtitle = "") {
   dialog.querySelectorAll(".multi-options input").forEach(box => box.addEventListener("change", () => {
     const container = box.closest(".multi-select");
     const count = container.querySelectorAll("input:checked").length;
-    container.querySelector(".selection-count").textContent = `${count} selected`;
+    container.querySelector(".selection-count").innerHTML = count ? `<strong>${count}</strong> selected` : `Select ${box.name}`;
+    box.closest(".multi-option")?.classList.toggle("is-checked", box.checked);
   }));
   return dialog;
 }
@@ -171,15 +181,21 @@ function closeDialog() { const dialog = document.querySelector("#editor-dialog")
 
 function openEditor(kind, id, defaults = {}) {
   const row = data[kind].find(row => row.id === id) || { active: true, ...defaults };
-  let fields = input("name", kind === "tables" ? "Table / room name" : "Name", row.name, "text", 'required maxlength="120"');
-  if (["menus", "categories", "items"].includes(kind)) fields += textarea("description", "Description", row.description);
-  if (kind === "menus") fields += input("hours", "Serving hours", row.hours, "text", 'maxlength="120" placeholder="e.g. 7:00 AM - 11:00 AM"') + multi("tableIds", "Tables", data.tables, data.tables.filter(t => t.menuIds.includes(row.id)).map(t => t.id));
-  if (kind === "categories") fields += select("menuId", "Menu", data.menus, row.menuId || filter) + input("sortOrder", "Display order", row.sortOrder ?? 0, "number", 'min="0" max="100000" step="1" required');
-  if (kind === "items") fields += `<div class="form-row">${select("categoryId", "Category", data.categories.map(c => ({ ...c, name: `${nameOf("menus", c.menuId)} / ${c.name}` })), row.categoryId)}${input("price", `Price (${data.restaurant.currency})`, row.price ?? "", "number", 'min="0" max="1000000" step="0.01" required')}</div>${input("imageUrl", "Photo URL (optional)", row.imageUrl, "url", 'maxlength="2000" placeholder="https://..."')}${input("allergens", "Allergens (optional)", row.allergens, "text", 'maxlength="300" placeholder="e.g. Milk, eggs, nuts"')}${input("sortOrder", "Display order", row.sortOrder ?? 0, "number", 'min="0" max="100000" step="1" required')}${toggleField("vegetarian", "Vegetarian dish", row.vegetarian)}`;
-  if (kind === "tables") fields += input("location", "Location (optional)", row.location, "text", 'maxlength="200" placeholder="e.g. Terrace, main dining room"') + multi("menuIds", "Menus", data.menus, row.menuIds);
-  if (kind === "qrs") fields += `${select("targetType", "Destination type", [{ id: "table", name: "Table (uses all menus assigned to it)" }, { id: "menus", name: "Selected menus" }], row.targetType || "table")}<div id="table-target">${select("tableId", "Table", data.tables, row.tableId, true)}</div><div id="menu-target">${multi("menuIds", "Menus", data.menus, row.menuIds)}</div>`;
-  fields += toggleField("active", "Active - available to guests", row.active);
-  const dialog = showDialog(`${id ? "Edit" : "Add"} ${singular[kind]}`, `<form id="record-form" class="form">${fields}<p class="form-error" role="alert"></p><div class="dialog-actions"><button class="button" type="button" data-action="close">Cancel</button><button class="button primary" type="submit">${id ? "Save changes" : `Create ${singular[kind]}`}</button></div></form>`, ["menus", "tables"].includes(kind) && !id ? "A permanent QR code will be created automatically." : "Changes appear on the guest menu automatically.");
+  let fields = input("name", kind === "tables" ? "Table / room name" : "Name", row.name, "text", 'required maxlength="120" placeholder="e.g. ' + (kind === "tables" ? "Table 12" : kind === "menus" ? "Dinner Menu" : kind === "items" ? "Chicken Kabsa" : "Appetizers") + '"');
+  if (["menus", "categories", "items"].includes(kind)) fields += textarea("description", "Description (optional)", row.description);
+  if (kind === "menus") fields += input("hours", "Serving hours (optional)", row.hours, "text", 'maxlength="120" placeholder="e.g. 6:30 AM - 10:30 AM or All day"') + multi("tableIds", "Assigned Tables", data.tables, data.tables.filter(t => t.menuIds.includes(row.id)).map(t => t.id));
+  if (kind === "categories") fields += select("menuId", "Parent Menu", data.menus, row.menuId || filter) + input("sortOrder", "Display order", row.sortOrder ?? 0, "number", 'min="0" max="100000" step="1" required');
+  if (kind === "items") fields += `<div class="form-row">${select("categoryId", "Category", data.categories.map(c => ({ ...c, name: `${nameOf("menus", c.menuId)} / ${c.name}` })), row.categoryId)}${input("price", `Price (${data.restaurant.currency})`, row.price ?? "", "number", 'min="0" max="1000000" step="0.01" required placeholder="0.00"')}</div>${input("imageUrl", "Photo URL (optional)", row.imageUrl, "url", 'maxlength="2000" placeholder="https://images.unsplash.com/..."')}${input("allergens", "Allergens (optional)", row.allergens, "text", 'maxlength="300" placeholder="e.g. Milk, eggs, nuts, gluten"')}${input("sortOrder", "Display order", row.sortOrder ?? 0, "number", 'min="0" max="100000" step="1" required')}${toggleField("vegetarian", "Vegetarian dish", row.vegetarian, "Displays a green vegetarian badge on the digital menu")}`;
+  if (kind === "tables") fields += input("location", "Location / Area (optional)", row.location, "text", 'maxlength="200" placeholder="e.g. Terrace, Main Dining Room, Rooftop"') + multi("menuIds", "Assigned Menus", data.menus, row.menuIds);
+  if (kind === "qrs") fields += `${select("targetType", "Destination type", [{ id: "table", name: "Table (dynamically shows all menus assigned to the table)" }, { id: "menus", name: "Selected menus (direct menu link)" }], row.targetType || "table")}<div id="table-target">${select("tableId", "Target Table", data.tables, row.tableId, true)}</div><div id="menu-target">${multi("menuIds", "Target Menus", data.menus, row.menuIds)}</div>`;
+  fields += toggleField("active", "Active status", row.active, "Available immediately for guests when scanned or browsed");
+  const isAutoQr = ["menus", "tables"].includes(kind) && !id;
+  const dialog = showDialog(
+    `${id ? "Edit" : "Add"} ${singular[kind]}`,
+    `<form id="record-form" class="form dialog-form">${fields}<p class="form-error" role="alert"></p><div class="dialog-actions"><button class="button" type="button" data-action="close">Cancel</button><button class="button primary" type="submit">${id ? icon("check") + " Save changes" : icon("plus") + ` Create ${singular[kind]}`}</button></div></form>`,
+    isAutoQr ? "A dynamic QR code will be created automatically for this record." : "Changes publish automatically to the guest menu in real-time.",
+    `${kind.toUpperCase()} MANAGEMENT`
+  );
   if (kind === "qrs") {
     const target = dialog.querySelector('[name="targetType"]');
     const update = () => { dialog.querySelector("#table-target").hidden = target.value !== "table"; dialog.querySelector("#menu-target").hidden = target.value !== "menus"; };
@@ -205,20 +221,54 @@ async function viewQr(id) {
   let qr = tab === "qrs" ? data.qrs.find(q => q.id === id) : tab === "tables" ? data.qrs.find(q => q.targetType === "table" && q.tableId === id) : data.qrs.find(q => q.targetType === "menus" && q.menuIds.includes(id));
   if (!qr) { openEditor("qrs", null, tab === "tables" ? { targetType: "table", tableId: id, name: `${nameOf("tables", id)} QR` } : { targetType: "menus", menuIds: [id], name: `${nameOf("menus", id)} QR` }); return; }
   const url = qrUrl(qr.id);
-  const dialog = showDialog(qr.name, `<div class="qr-preview"><div class="qr-paper"><span class="eyebrow">${esc(data.restaurant.name)}</span><canvas id="qr-canvas" aria-label="QR code for ${esc(qr.name)}"></canvas><strong>Scan. Explore. Enjoy.</strong><span>${esc(qr.id)}</span></div></div><div class="qr-modal-status">${badge(qr.active)}<span>The printed code stays the same when menus change.</span></div><label class="url-field">Permanent guest link<input id="qr-url" readonly value="${esc(url)}"></label>${/^(localhost|127\.0\.0\.1)$/.test(new URL(url).hostname) ? '<p class="local-note">Scanning with your phone? Open the admin using the Wi-Fi address printed in your terminal, then view this QR again.</p>' : ""}<div class="dialog-actions qr-buttons"><button class="button" id="copy-qr">Copy link</button><button class="button" id="download-qr">${icon("download")} Download PNG</button><a class="button primary" target="_blank" rel="noopener" href="${esc(url)}">Open guest view ${icon("arrow")}</a></div>`, "One permanent link. Your latest menus, every time.");
+  const dialog = showDialog(
+    qr.name,
+    `<div class="qr-modal-body"><div class="qr-preview-wrapper"><div class="qr-paper"><span class="qr-paper-brand">${esc(data.restaurant.name)}</span><div class="qr-canvas-frame"><canvas id="qr-canvas" aria-label="QR code for ${esc(qr.name)}"></canvas></div><strong class="qr-paper-tag">Scan. Explore. Enjoy.</strong><span class="qr-paper-code">${esc(qr.id)}</span></div></div><div class="qr-modal-status">${badge(qr.active)}<span>The printed code stays the same when menus change.</span></div><div class="url-copy-box"><label class="field-label" for="qr-url">Permanent guest link</label><div class="url-input-group"><input id="qr-url" readonly value="${esc(url)}"><button class="button url-copy-btn" id="copy-qr" type="button">${icon("check")} Copy</button></div></div>${/^(localhost|127\.0\.0\.1)$/.test(new URL(url).hostname) ? '<div class="local-note-banner"><span>📱</span><span>Scanning with phone? Open this admin using your Wi-Fi address, then view this QR again.</span></div>' : ""}<div class="dialog-actions qr-buttons"><button class="button" id="download-qr" type="button">${icon("download")} Download PNG</button><a class="button primary" target="_blank" rel="noopener" href="${esc(url)}">Open guest view ${icon("arrow")}</a></div></div>`,
+    "One permanent link. Your latest menus, every time.",
+    "DYNAMIC QR CODE"
+  );
   await QRCode.toCanvas(dialog.querySelector("canvas"), url, { width: 300, margin: 2, errorCorrectionLevel: "M", color: { dark: "#143e35", light: "#ffffff" } });
   dialog.querySelector("#copy-qr").addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(url); toast("Guest link copied."); }
-    catch { const field = dialog.querySelector("#qr-url"); field.select(); toast("Select and copy the link above."); }
+    try {
+      await navigator.clipboard.writeText(url);
+      const copyBtn = dialog.querySelector("#copy-qr");
+      copyBtn.innerHTML = `${icon("check")} Copied!`;
+      copyBtn.classList.add("copied");
+      setTimeout(() => {
+        if (copyBtn) {
+          copyBtn.innerHTML = `${icon("check")} Copy`;
+          copyBtn.classList.remove("copied");
+        }
+      }, 2000);
+      toast("Guest link copied.");
+    } catch {
+      const field = dialog.querySelector("#qr-url");
+      field.select();
+      toast("Select and copy the link above.");
+    }
   });
   dialog.querySelector("#download-qr").addEventListener("click", async () => {
-    const a = document.createElement("a"); a.href = await QRCode.toDataURL(url, { width: 1000, margin: 4, errorCorrectionLevel: "M" }); a.download = `${qr.id}.png`; a.click();
+    const a = document.createElement("a");
+    a.href = await QRCode.toDataURL(url, { width: 1000, margin: 4, errorCorrectionLevel: "M" });
+    a.download = `${qr.id}.png`;
+    a.click();
   });
 }
 function deleteDialog(kind, id) {
   const row = data[kind].find(row => row.id === id);
-  const consequence = { menus: "Its categories and items will also be deleted, and it will be removed from all tables and QR destinations.", categories: "All items in this category will also be deleted.", items: "This item will be removed from the guest menu.", tables: "Its QR codes will also be deleted. Menus will be kept.", qrs: "Anyone scanning this printed code will see an unavailable message." };
-  const dialog = showDialog(`Delete ${singular[kind]}?`, `<p class="delete-copy">Delete <strong>${esc(row.name)}</strong>? ${consequence[kind]} This cannot be undone.</p><p class="form-error" role="alert"></p><div class="dialog-actions"><button class="button" data-action="close">Cancel</button><button class="button danger" id="confirm-delete">Delete ${singular[kind]}</button></div>`);
+  const consequence = {
+    menus: "Its categories and items will also be deleted, and it will be removed from all tables and QR destinations.",
+    categories: "All items in this category will also be deleted.",
+    items: "This item will be removed from the guest menu.",
+    tables: "Its QR codes will also be deleted. Menus will be kept.",
+    qrs: "Anyone scanning this printed code will see an unavailable message."
+  };
+  const dialog = showDialog(
+    `Delete ${singular[kind]}?`,
+    `<div class="delete-modal-body"><div class="danger-callout"><span class="danger-callout-icon">${icon("trash")}</span><div><p class="delete-copy">Delete <strong>${esc(row.name)}</strong>?</p><p class="delete-consequence">${consequence[kind]}</p></div></div><p class="delete-warning-note">⚠️ This cannot be undone.</p><p class="form-error" role="alert"></p><div class="dialog-actions"><button class="button" type="button" data-action="close">Cancel</button><button class="button danger-btn" id="confirm-delete" type="button">${icon("trash")} Delete ${singular[kind]}</button></div></div>`,
+    "Please confirm before removing this record.",
+    "CONFIRM DELETION"
+  );
   dialog.querySelector("#confirm-delete").addEventListener("click", async event => {
     event.target.disabled = true;
     try { await api(`/admin/${kind}/${id}`, "DELETE"); closeDialog(); await refresh(); toast(`${singular[kind]} deleted.`); }
