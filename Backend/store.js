@@ -42,7 +42,7 @@ function seedData() {
 
   return {
     admins: [{ id: "seed-admin", email: (process.env.ADMIN_EMAIL || "admin@restaurant.local").toLowerCase(), salt, hash: passwordHash(process.env.ADMIN_PASSWORD || "Admin@12345", salt), role: "owner", active: true, createdAt: new Date().toISOString() }],
-    restaurant: [{ id: "settings", name: "Millenium Aqeeq", tagline: "Good food. A warm welcome.", currency: "SAR", announcement: "Welcome! Browse our menu and place your order with your waiter.", address: "Madinah, Saudi Arabia", phone: "", publicBaseUrl: "" }],
+    restaurant: [{ id: "settings", name: "Millenium Aqeeq", tagline: "Good food. A warm welcome.", currency: "SAR", announcement: "Welcome! Browse our menu and place your order with your waiter.", address: "Madinah, Saudi Arabia", phone: "", publicBaseUrl: "https://qr-menu-demo-9vhn.onrender.com" }],
     menus,
     categories,
     items: dishes.map(([categoryId, name, price, description, vegetarian], index) => ({ id: `dish-${index + 1}`, categoryId, name, price, description, vegetarian, allergens: "", imageUrl: "", sortOrder: index, active: true })),
