@@ -335,7 +335,17 @@ a { color: inherit; }
   color: var(--faint);
 }
 
-.search-field input { padding-left: 40px; }
+.search-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 12px 10px 40px;
+  outline: none;
+}
 
 .search-field, .form input, .form select, .form textarea, .filter-bar select, .url-field input {
   width: 100%;
@@ -353,6 +363,8 @@ a { color: inherit; }
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgba(8, 117, 104, 0.12);
 }
+
+.search-field input::placeholder { color: var(--faint); }
 
 .filter-bar select { max-width: 260px; }
 
@@ -376,12 +388,18 @@ a { color: inherit; }
   flex-direction: column;
   gap: 11px;
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  overflow: visible;
 }
 
 .record-card:hover {
   border-color: rgba(8, 117, 104, 0.38);
   box-shadow: var(--shadow);
   transform: translateY(-2px);
+}
+
+.record-card:has(.actions-menu[open]),
+.record-card:focus-within {
+  z-index: 40;
 }
 
 .record-card.is-inactive { opacity: 0.68; }
@@ -443,40 +461,66 @@ a { color: inherit; }
 .price-line strong { font-size: 18px; }
 .card-actions { margin-top: auto; padding-top: 10px; }
 .actions-menu { position: relative; }
-.actions-menu summary { list-style: none; }
+.actions-menu summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  appearance: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  list-style: none;
+  white-space: nowrap;
+}
 .actions-menu summary::-webkit-details-marker { display: none; }
+.actions-menu[open] { z-index: 50; }
 
 .actions-popover {
   display: none;
   position: absolute;
   right: 0;
-  top: 42px;
-  z-index: 10;
+  top: calc(100% + 6px);
+  z-index: 60;
   min-width: 190px;
-  padding: 7px;
-  border: 1px solid var(--line);
+  padding: 6px;
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: #fff;
-  box-shadow: var(--shadow);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.actions-menu[open] .actions-popover, .actions-menu:focus-within .actions-popover, .actions-menu:hover .actions-popover {
+.actions-menu[open] > .actions-popover {
   display: grid;
-  gap: 4px;
+  gap: 3px;
 }
 
 .actions-popover button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
   justify-content: flex-start;
   border: 0;
   border-radius: 6px;
   background: transparent;
   color: var(--text);
-  padding: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 650;
   text-align: left;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.actions-popover button .icon {
+  width: 15px;
+  height: 15px;
 }
 
 .actions-popover button:hover { background: var(--soft); }
 .actions-popover .danger-text { color: var(--danger); }
+.actions-popover .danger-text:hover { background: var(--danger-soft); }
 
 .empty-state, .unavailable, .loading {
   grid-column: 1 / -1;
@@ -868,7 +912,7 @@ body::before {
 
 .record-card {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .record-card::before {
@@ -876,6 +920,7 @@ body::before {
   position: absolute;
   inset: 0 0 auto;
   height: 4px;
+  border-radius: 8px 8px 0 0;
   background: linear-gradient(90deg, var(--accent), rgba(173, 116, 31, 0.72));
   opacity: 0;
   transition: opacity 160ms ease;

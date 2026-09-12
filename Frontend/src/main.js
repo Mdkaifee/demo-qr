@@ -26,7 +26,9 @@ const icons = {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   leaf: '<path d="M20 3C7 3 2 8 5 15c6 9 16 1 15-12ZM5 20 15 10"/>',
   edit: '<path d="m15 4 5 5M4 20l5-1L21 7l-4-4L5 15z"/>',
-  dot: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'
+  dot: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+  trash: '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>',
+  toggle: '<path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/>'
 };
 const icon = (name, cls = "") => `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.menus}</svg>`;
 const esc = value => String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
@@ -132,7 +134,7 @@ function cardsContent() {
       meta = `<div class="qr-id">${esc(row.id)}</div><span class="hours">Permanent link - Editable destination</span>`;
       view = `<button class="button small" data-action="view" data-id="${row.id}">${icon("qrs")} View QR</button>`;
     }
-    return `<article class="record-card ${row.active ? "" : "is-inactive"}" data-record="${row.id}"><div class="card-top"><span class="card-icon ${tab === "items" && row.imageUrl ? "with-image" : ""}">${top}</span>${badge(row.active)}</div><h3>${esc(row.name)}</h3>${detail}<div class="card-meta">${meta}</div><div class="card-actions">${view}<details class="actions-menu"><summary class="button small" aria-label="Actions for ${esc(row.name)}">Actions ${icon("dot")}</summary><div class="actions-popover"><button data-action="edit" data-id="${row.id}">Edit ${singular[tab]}</button><button data-action="toggle" data-id="${row.id}">${row.active ? "Deactivate" : "Activate"}</button><button class="danger-text" data-action="delete" data-id="${row.id}">Delete ${singular[tab]}</button></div></details></div></article>`;
+    return `<article class="record-card ${row.active ? "" : "is-inactive"}" data-record="${row.id}"><div class="card-top"><span class="card-icon ${tab === "items" && row.imageUrl ? "with-image" : ""}">${top}</span>${badge(row.active)}</div><h3>${esc(row.name)}</h3>${detail}<div class="card-meta">${meta}</div><div class="card-actions">${view}<details class="actions-menu"><summary class="button small" aria-label="Actions for ${esc(row.name)}">Actions ${icon("dot")}</summary><div class="actions-popover"><button type="button" data-action="edit" data-id="${row.id}">${icon("edit")} Edit ${singular[tab]}</button><button type="button" data-action="toggle" data-id="${row.id}">${icon("toggle")} ${row.active ? "Deactivate" : "Activate"}</button><button type="button" class="danger-text" data-action="delete" data-id="${row.id}">${icon("trash")} Delete ${singular[tab]}</button></div></details></div></article>`;
   }).join("");
 }
 function bindFilters() {
