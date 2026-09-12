@@ -35,8 +35,20 @@ const badge = active => `<span class="badge ${active ? "active" : "inactive"}"><
 const nameOf = (kind, id) => data[kind].find(row => row.id === id)?.name || "Unassigned";
 const qrUrl = id => `${data?.restaurant.publicBaseUrl || location.origin}/?scan=${encodeURIComponent(id)}`;
 
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+
 async function api(path, method = "GET", body) {
-  const response = await fetch(`/api${path}`, { method, credentials: "same-origin", cache: "no-store", headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(auth ? { "X-CSRF-Token": auth.csrfToken } : {}) }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(15000) });
+  const response = await fetch(`${API_URL}/api${path}`, {
+    method,
+    credentials: "include",
+    cache: "no-store",
+    headers: {
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(auth ? { "X-CSRF-Token": auth.csrfToken } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(15000),
+  });
   const result = await response.json().catch(() => ({ error: "The server returned an unexpected response." }));
   if (!response.ok) {
     if (response.status === 401 && isAdmin && !path.startsWith("/auth/")) { auth = null; closeDialog(); renderLogin(); }
